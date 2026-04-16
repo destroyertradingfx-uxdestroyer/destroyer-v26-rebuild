@@ -5189,26 +5189,54 @@ void UpdateQueenBeeStatus()
 //| V34 ENHANCED: IsDrawdownSafe - Portfolio-Level Circuit Breaker    |
 //| Returns false when drawdown exceeds threshold (blocks new trades)|
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| V34 ENHANCED: IsDrawdownSafe - Portfolio-Level Circuit Breaker    |
+//| Returns false when drawdown exceeds threshold (blocks new trades)|
+//| V34 FIX #2: Added recovery mechanism - system resumes after DD   |
+//| drops below 70% of threshold (breathing room).                   |
+//+------------------------------------------------------------------+
 bool IsDrawdownSafe()
 {
    // Use existing g_current_drawdown (updated by UpdateQueenBeeStatus)
+   
+   // RECOVERY MECHANISM: If DD has recovered below 70% of threshold, resume trading
+   double recoveryThreshold = InpDefensiveDD_Percent * 0.7; // e.g., 8% * 0.7 = 5.6%
+   double blockThreshold = InpDefensiveDD_Percent;          // e.g., 8%
+   
+   // If we're in defensive mode but DD has recovered, clear it
+   if(g_hive_state == HIVE_STATE_DEFENSIVE && g_current_drawdown < recoveryThreshold)
+   {
+      g_hive_state = HIVE_STATE_GROWTH;
+      LogError(ERROR_INFO, "V34 Circuit Breaker: RECOVERY - DD recovered to " + 
+               DoubleToString(g_current_drawdown, 2) + "% < " + 
+               DoubleToString(recoveryThreshold, 2) + "%. Resuming trading.", "IsDrawdownSafe");
+      return true;
+   }
+   
    // If hive state is DEFENSIVE, block new entries
    if(g_hive_state == HIVE_STATE_DEFENSIVE) {
-      LogError(ERROR_WARNING, "V34 Circuit Breaker: DEFENSIVE mode active. DD: " + 
-               DoubleToString(g_current_drawdown, 2) + "%. Blocking new entries.", "IsDrawdownSafe");
+      // Only log occasionally to reduce spam (every 100 ticks or so)
+      static int blockLogCounter = 0;
+      if(blockLogCounter % 100 == 0) {
+         LogError(ERROR_WARNING, "V34 Circuit Breaker: DEFENSIVE mode active. DD: " + 
+                  DoubleToString(g_current_drawdown, 2) + "%. Blocking new entries. Recovery at: " +
+                  DoubleToString(recoveryThreshold, 2) + "%", "IsDrawdownSafe");
+      }
+      blockLogCounter++;
       return false;
    }
    
-   // Additional safety: absolute drawdown check
-   if(g_current_drawdown >= InpDefensiveDD_Percent * 0.9) { // 90% of threshold = warning zone
+   // Additional safety: absolute drawdown check (90% of threshold = warning zone)
+   if(g_current_drawdown >= blockThreshold * 0.9) {
       LogError(ERROR_WARNING, "V34 Circuit Breaker: DD approaching threshold. DD: " + 
                DoubleToString(g_current_drawdown, 2) + "% >= " + 
-               DoubleToString(InpDefensiveDD_Percent * 0.9, 2) + "%. Blocking.", "IsDrawdownSafe");
+               DoubleToString(blockThreshold * 0.9, 2) + "%. Blocking.", "IsDrawdownSafe");
       return false;
    }
    
    return true;
 }
+
 
 
 //+------------------------------------------------------------------+
@@ -5497,6 +5525,12 @@ void GeneratePerformanceReport()
 //+------------------------------------------------------------------+
 void ExecuteMeanReversionModelV8_6()
 {
+   // V34: Self-regulate drawdown - block new entries if circuit breaker is active
+   if(!IsDrawdownSafe()) {
+      LogError(ERROR_INFO, "ExecuteMeanReversionModelV8_6: SKIPPED - Circuit breaker active (DD: " + DoubleToString(g_current_drawdown, 2) + "%)", "ExecuteMeanReversionModelV8_6");
+      return;
+   }
+
    if(Period() != PERIOD_H4) return;
    if(!InpMeanReversion_Enabled) 
    {
@@ -6056,6 +6090,11 @@ void ExecuteMathReversal()
 
 void ExecuteMicrostructureStrategy()
 {
+   // V34: Self-regulate drawdown
+   if(!IsDrawdownSafe()) {
+      LogError(ERROR_INFO, "Chronos: SKIPPED - Circuit breaker active", "ExecuteMicrostructureStrategy");
+      return;
+   }
    // 0. MASTER SWITCH CHECK
    if(!InpChronos_Enabled)
    {
@@ -7686,6 +7725,12 @@ void ApplyEMATrailV8(int ticket, int order_type)
 //+------------------------------------------------------------------+
 void ExecuteTitanStrategy()
 {
+   // V34: Self-regulate drawdown - block new entries if circuit breaker is active
+   if(!IsDrawdownSafe()) {
+      LogError(ERROR_INFO, "ExecuteTitanStrategy: SKIPPED - Circuit breaker active (DD: " + DoubleToString(g_current_drawdown, 2) + "%)", "ExecuteTitanStrategy");
+      return;
+   }
+
    // V34 FIX: Titan filters simplified from 7 to 3: EMA trend + ATR volatility + momentum confirmation.
    // Old 7-filter chain had near-zero pass probability (0.5^7 = 0.78%).
    // Max 3 sequential filters per strategy architecture rule.
@@ -7904,6 +7949,12 @@ void ExecuteTitanStrategy()
 //+------------------------------------------------------------------+
 void ExecuteWardenStrategy()
 {
+   // V34: Self-regulate drawdown - block new entries if circuit breaker is active
+   if(!IsDrawdownSafe()) {
+      LogError(ERROR_INFO, "ExecuteWardenStrategy: SKIPPED - Circuit breaker active (DD: " + DoubleToString(g_current_drawdown, 2) + "%)", "ExecuteWardenStrategy");
+      return;
+   }
+
     if(Period() != PERIOD_H4) return;
     if(!InpWarden_Enabled) return; // LEVIATHAN: All strategies enabled // V34: Restored enabled check (was LEVIATHAN override)
     if(CountOpenTrades(InpWarden_MagicNumber) > 0) return;
