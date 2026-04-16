@@ -7,7 +7,7 @@
 
 /*
 ==================================================================================================================
-   ### V34.0 ENHANCED - CIRCUIT BREAKER + FILTER ARCHITECTURE REBUILD (2026-04-16) ###
+   ### V34.1 ENHANCED - CIRCUIT BREAKER + FILTER ARCHITECTURE REBUILD (2026-04-16) ###
 ==================================================================================================================
    STATUS: PRODUCTION BUILD -- All V27-V33 bugs fixed + architectural improvements.
    
