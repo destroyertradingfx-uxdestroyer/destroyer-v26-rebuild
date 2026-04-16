@@ -10950,8 +10950,10 @@ int GetATRStopLossPips()
    double pips = slValue / Point;
    
    // Safety clamps
-   if(pips < 15) pips = atr / Point * 1.5 // V34: Min 1.5 ATR for H4 (was 15 pips hardcoded); // Minimum 1.5 ATR for H4 timeframe
-   if(pips > 100) pips = atr / Point * 3.0 // V34: Max 3.0 ATR; // Maximum 3.0 ATR
+   double minSL = atr * 1.5 / Point; // V34: Min 1.5 ATR for H4
+   double maxSL = atr * 3.0 / Point; // V34: Max 3.0 ATR
+   if(pips < minSL) pips = minSL;
+   if(pips > maxSL) pips = maxSL;
    
    return (int)pips;
 }
