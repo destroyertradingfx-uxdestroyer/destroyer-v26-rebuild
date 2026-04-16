@@ -2766,18 +2766,9 @@ double GetLotSizeV8_5_9_FIXED(double tqs, double stopLossPoints, double risk_per
     double dynamic_risk_multiplier = GetDynamicRiskMultiplier(current_drawdown);
     double final_risk_percent = risk_percent * dynamic_risk_multiplier;
     
-    // HUNTSMAN PROTOCOL INTEGRATION
-   // V34.3: Removed Huntsman (dead strategy, never executes)
-    {
-   // V34.3: Removed Huntsman (dead strategy, never executes)
-        {
-   // V34.3: Removed Huntsman (dead strategy, never executes)
-        }
-        else
-        {
-            g_huntsman_phase_active = false;
-        }
-    }
+    // V34.3: Huntsman removed - set inactive
+    g_huntsman_phase_active = false;
+
     
     // STATE-BASED RISK CALCULATION
     if(InpEnableCompounding && AccountEquity() < g_high_watermark_equity)
@@ -7839,7 +7830,7 @@ void ExecuteWardenStrategy()
    double avg_range = iATR(Symbol(), Period(), 10, 1);
    
    int direction = 0;
-   double sl_price, tp_price;
+   double sl_price = 0.0, tp_price = 0.0;
    
    // BUY: Close above BB upper + momentum confirm + range expansion
    if(Close[1] > bb_upper_now && Close[1] > momentum_ma && bar_range > avg_range) {
@@ -9046,15 +9037,15 @@ void InitializeInstitutionalDashboard() {
 
 void UpdateInstitutionalDashboard() {
     // UPDATE COMPETITION SCORES
-    CompetitionOptimizer.OptimizeForCompetitionJudging();
+   // V34.3: Removed CompetitionOptimizer - CompetitionOptimizer.OptimizeForCompetitionJudging();
     
-    double totalScore = CompetitionOptimizer.GetTotalScore();
+   // V34.3: Removed CompetitionOptimizer - double totalScore = CompetitionOptimizer.GetTotalScore();
     string scoreText = "Competition Score: " + DoubleToStr(totalScore, 2) + "/10.0";
     ObjectSetText("SCORE_PANEL", scoreText, 10, "Arial Bold", clrWhite);
     
-    string breakdown = "Originality: " + DoubleToStr(CompetitionOptimizer.GetOriginalityScore(), 1) + 
-                      " | Code: " + DoubleToStr(CompetitionOptimizer.GetCodeQualityScore(), 1) + 
-                      " | Function: " + DoubleToStr(CompetitionOptimizer.GetFunctionalityScore(), 1);
+   // V34.3: Removed CompetitionOptimizer - string breakdown = "Originality: " + DoubleToStr(CompetitionOptimizer.GetOriginalityScore(), 1) +
+   // V34.3: Removed CompetitionOptimizer - " | Code: " + DoubleToStr(CompetitionOptimizer.GetCodeQualityScore(), 1) +
+   // V34.3: Removed CompetitionOptimizer - " | Function: " + DoubleToStr(CompetitionOptimizer.GetFunctionalityScore(), 1);
     ObjectSetText("SCORE_BREAKDOWN", breakdown, 8, "Arial", InpDashboard_Text_Color);
     
     // UPDATE INSTITUTIONAL METRICS
@@ -9168,15 +9159,15 @@ void InitializeInstitutionalSystem() {
     LogError(ERROR_INFO, "? Institutional Risk Manager: Portfolio VAR = " + DoubleToStr(InstitutionalRisk.GetPortfolioVAR(), 2) + "%", "InitializeInstitutionalSystem");
     
     // PHASE 2: DEPLOY PROP DESK CAPITAL ALLOCATOR
-    PropDesk.ImplementPropDeskAllocation();
+   // V34.3: Removed PropDesk - PropDesk.ImplementPropDeskAllocation();
     LogError(ERROR_INFO, "? Prop Desk Capital Allocator: Performance-based allocation active", "InitializeInstitutionalSystem");
     
     // PHASE 3: DEPLOY COMPETITION OPTIMIZER
-    CompetitionOptimizer.OptimizeForCompetitionJudging();
+   // V34.3: Removed CompetitionOptimizer - CompetitionOptimizer.OptimizeForCompetitionJudging();
     LogError(ERROR_INFO, "? Competition Optimizer: Scoring system active", "InitializeInstitutionalSystem");
     
     // PHASE 4: DEPLOY PERFORMANCE BOOSTER
-    PerformanceBooster.DeployPerformanceAccelerator();
+   // V34.3: Removed PerformanceBooster - PerformanceBooster.DeployPerformanceAccelerator();
     LogError(ERROR_INFO, "? Performance Booster: Aggressive optimization engaged", "InitializeInstitutionalSystem");
     
     // PHASE 5: INITIALIZE INSTITUTIONAL DASHBOARD
@@ -9278,7 +9269,7 @@ void InitializeEliteSystem() {
     LogError(ERROR_INFO, ">> INITIALIZING ELITE SYSTEM V13.0", "InitializeEliteSystem");
     
     // DEPLOY ALL ELITE COMPONENTS
-    PF350Engine.DeployElitePerformanceTuning();
+   // V34.3: Removed PF350Engine - PF350Engine.DeployElitePerformanceTuning();
     
     LogError(ERROR_INFO, "? PF 3.50+ Achievement Engine: TARGET 3.50+ PF", "InitializeEliteSystem");
     LogError(ERROR_INFO, "? Adaptive Parameter Tuning: Market regime adaptation active", "InitializeEliteSystem");
@@ -9299,8 +9290,8 @@ void OnTick_Elite() {
     // RUN ELITE PERFORMANCE OPTIMIZATION EVERY 5 MINUTES
     static datetime lastEliteUpdate = 0;
     if(TimeCurrent() - lastEliteUpdate >= 300) {
-        RealTimePerformanceAccelerator.ExecutePerformanceAcceleration();
-        EliteDashboard.UpdateEliteDashboard();
+   // V34.3: Removed RealTimePerformanceAccelerator - RealTimePerformanceAccelerator.ExecutePerformanceAcceleration();
+   // V34.3: Removed EliteDashboard - EliteDashboard.UpdateEliteDashboard();
         lastEliteUpdate = TimeCurrent();
     }
     
@@ -9308,20 +9299,20 @@ void OnTick_Elite() {
     if(InpSiliconX_Enabled) ExecuteSiliconCore();
 
     // ADVANCED TRADE MANAGEMENT
-    AdvancedTradeManagement.ManageOpenTradesElite();
+   // V34.3: Removed AdvancedTradeManagement - AdvancedTradeManagement.ManageOpenTradesElite();
     
     // CORRELATION ARBITRAGE
-    CorrelationArbitrage.ActivateCorrelationArbitrage();
+   // V34.3: Removed CorrelationArbitrage - CorrelationArbitrage.ActivateCorrelationArbitrage();
 }
 
 void OnNewBar_Elite() {
     // ELITE BAR-BY-BAR OPTIMIZATION
     
     // UPDATE ADAPTIVE PARAMETERS
-    AdaptiveParameterTuning.DeployAdaptiveParameterTuning();
+   // V34.3: Removed AdaptiveParameterTuning - AdaptiveParameterTuning.DeployAdaptiveParameterTuning();
     
     // PF 3.50+ OPTIMIZATION CYCLE
-    PF350Engine.ImplementPerformanceFeedbackLoop();
+   // V34.3: Removed PF350Engine - PF350Engine.ImplementPerformanceFeedbackLoop();
     
     LogError(ERROR_INFO, "ELITE BAR OPTIMIZATION: PF 3.50+ cycle completed", "OnNewBar_Elite");
 }
