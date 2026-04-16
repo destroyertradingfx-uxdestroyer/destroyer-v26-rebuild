@@ -5551,7 +5551,7 @@ void ExecuteMeanReversionModelV8_6()
       return;
    }
    
-   // V34.2 FIX: Removed broken IsReaperConditionMet pre-filter from MR.
+   // V34.3 FIX: Removed broken IsReaperConditionMet pre-filter from MR.
    
    int shift = 0;
    g_active_model = MODEL_MEAN_REVERSION;
